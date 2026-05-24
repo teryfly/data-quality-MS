@@ -3,13 +3,73 @@ import { mockDelay, mockPaginate, createMockBlob } from '../utils.js'
 import { mockRuleCategories } from '../data/ruleCategories.js'
 import { getRules, addRule, updateRule, deleteRule, batchEnable, batchDelete } from '../store/ruleStore.js'
 
+let categoriesStore = JSON.parse(JSON.stringify(mockRuleCategories))
+let categoryIdSeq = categoriesStore.length + 1
+
 export const ruleHandlers = [
   http.get('/api/rule/category', async () => {
     await mockDelay()
     return HttpResponse.json({
       code: 200,
       message: '成功',
-      data: mockRuleCategories
+      data: categoriesStore
+    })
+  }),
+
+  http.post('/api/rule/category', async ({ request }) => {
+    await mockDelay()
+    const body = await request.json()
+    const newCat = { id: categoryIdSeq++, ...body }
+    categoriesStore.push(newCat)
+    return HttpResponse.json({ code: 200, message: '创建成功', data: newCat })
+  }),
+
+  http.put('/api/rule/category/:id', async ({ params, request }) => {
+    await mockDelay()
+    const { id } = params
+    const body = await request.json()
+    const idx = categoriesStore.findIndex(c => c.id === Number(id))
+    if (idx >= 0) { categoriesStore[idx] = { ...categoriesStore[idx], ...body } }
+    return HttpResponse.json({ code: 200, message: '更新成功', data: categoriesStore[idx] })
+  }),
+
+  http.delete('/api/rule/category/:id', async ({ params }) => {
+    await mockDelay()
+    const { id } = params
+    categoriesStore = categoriesStore.filter(c => c.id !== Number(id))
+    return HttpResponse.json({ code: 200, message: '删除成功', data: null })
+  }),
+
+  http.put('/api/rule/category/sort', async ({ request }) => {
+    await mockDelay()
+    const { ids } = await request.json()
+    ids.forEach((id, index) => {
+      const cat = categoriesStore.find(c => c.id === id)
+      if (cat) cat.sortOrder = index + 1
+    })
+    return HttpResponse.json({ code: 200, message: '排序更新成功', data: null })
+  }),
+
+  http.post('/api/rule/validate-sql', async ({ request }) => {
+    await mockDelay(500, 800)
+    const { expr } = await request.json()
+    const hasError = expr && expr.includes('ERROR')
+    return HttpResponse.json({
+      code: 200,
+      message: '成功',
+      data: { valid: !hasError, error: hasError ? 'SQL语法错误：无效的字段引用' : null }
+    })
+  }),
+
+  http.get('/api/rule/template/download', async () => {
+    await mockDelay(800, 1200)
+    const blob = createMockBlob('规则导入模板.xlsx')
+    return new HttpResponse(blob, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'Content-Disposition': 'attachment; filename=rule_import_template.xlsx'
+      }
     })
   }),
 
