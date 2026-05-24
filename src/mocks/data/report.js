@@ -1,0 +1,62 @@
+export const mockMonthlyReports = [
+  {
+    id: 1, orgId: 1, orgName: '达州市中医医院',
+    reportMonth: '2026-04',
+    score: 87.5,
+    ranking: 2, totalOrgCount: 7,
+    totalQcCount: 2340000,
+    totalProblemCount: 29250,
+    problemRatio: 1.25,
+    lastMonthProblemRatio: 1.48,
+    problemRatioGrowth: -0.23,
+    mostProblemRuleType: '空值检查',
+    mostProblemDataset: '患者基本信息',
+    analysis: '本月数据质量总体呈改善趋势，问题占比环比下降0.23个百分点。主要问题集中在空值检查（占问题总数38%）和值域检查（占24%），建议重点整改患者基本信息表中的身份证号、联系电话字段的空值问题，以及性别代码、民族代码的值域不规范问题。手术操作信息表本月数据量波动超过阈值，请核实是否存在数据漏报情况。',
+    createTime: '2026-05-01 02:30:00'
+  },
+  {
+    id: 2, orgId: 2, orgName: '达州市中心医院',
+    reportMonth: '2026-04',
+    score: 82.3,
+    ranking: 4, totalOrgCount: 7,
+    totalQcCount: 2100000,
+    totalProblemCount: 34560,
+    problemRatio: 1.65,
+    lastMonthProblemRatio: 1.52,
+    problemRatioGrowth: 0.13,
+    mostProblemRuleType: '值域检查',
+    mostProblemDataset: '门诊就诊记录',
+    analysis: '本月数据质量有所下降，问题占比环比上升0.13个百分点。门诊就诊记录表的值域检查问题增加明显，建议加强医生端数据录入培训，强化就诊类型、诊断代码等字段的规范性。',
+    createTime: '2026-05-01 03:15:00'
+  },
+  {
+    id: 3, orgId: 3, orgName: '通川区人民医院',
+    reportMonth: '2026-04',
+    score: 91.2,
+    ranking: 1, totalOrgCount: 7,
+    totalQcCount: 1850000,
+    totalProblemCount: 18500,
+    problemRatio: 1.0,
+    lastMonthProblemRatio: 1.15,
+    problemRatioGrowth: -0.15,
+    mostProblemRuleType: '规范检查',
+    mostProblemDataset: '患者基本信息',
+    analysis: '本月数据质量最优，问题占比为全市最低。整体数据质量良好，建议将该院的数据管理经验在全市推广。',
+    createTime: '2026-05-01 04:00:00'
+  },
+  {
+    id: 4, orgId: 1, orgName: '达州市中医医院',
+    reportMonth: '2026-05',
+    score: 89.8,
+    ranking: 1, totalOrgCount: 7,
+    totalQcCount: 2450000,
+    totalProblemCount: 27820,
+    problemRatio: 1.14,
+    lastMonthProblemRatio: 1.25,
+    problemRatioGrowth: -0.11,
+    mostProblemRuleType: '空值检查',
+    mostProblemDataset: '患者基本信息',
+    analysis: '本月数据质量持续改善，问题占比环比下降0.11个百分点。空值检查问题数量有所减少，说明前期整改措施取得效果。建议继续加强数据管理，特别是关键字段的完整性。',
+    createTime: '2026-05-24 10:30:00'
+  }
+]

@@ -1,0 +1,47 @@
+:root {
+  /* Primary Colors */
+  --color-primary: #1890ff;
+  --color-success: #52c41a;
+  --color-warning: #faad14;
+  --color-danger: #ff4d4f;
+
+  /* Text Colors */
+  --color-text-primary: #262626;
+  --color-text-secondary: #595959;
+  --color-text-tertiary: #8c8c8c;
+
+  /* Background & Border */
+  --color-border: #d9d9d9;
+  --color-bg-gray: #f0f2f5;
+  --color-bg-card: #ffffff;
+  --color-bg-dark: #001529;
+
+  /* Rule Level Colors */
+  --color-level-severe-bg: #fff1f0;
+  --color-level-severe-text: #ff4d4f;
+  --color-level-warning-bg: #fffbe6;
+  --color-level-warning-text: #faad14;
+  --color-level-info-bg: #e6f7ff;
+  --color-level-info-text: #1890ff;
+
+  /* Rectification Status Colors */
+  --color-status-unrectified: #ff4d4f;
+  --color-status-rectifying: #faad14;
+  --color-status-rectified: #52c41a;
+  --color-status-unnecessary: #8c8c8c;
+
+  /* Layout Sizes */
+  --layout-topbar-height: 60px;
+  --layout-sidebar-width: 220px;
+  --layout-sidebar-collapsed-width: 64px;
+  --layout-breadcrumb-height: 40px;
+  --layout-content-padding: 16px;
+
+  /* Font Stack */
+  --font-family-base: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+}
+
+* {
+  font-variant-numeric: tabular-nums;
+}
