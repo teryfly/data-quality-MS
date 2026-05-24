@@ -23,19 +23,19 @@ const routes = [
       {
         path: 'datasource',
         name: 'DataSource',
-        component: () => import('@/views/DataSource/index.vue'),
+        component: () => import('@/views/datasource/index.vue'),
         meta: { title: '数据源管理' },
       },
       {
         path: 'datasource/dataset',
         name: 'DataSet',
-        component: () => import('@/views/DataSource/DataSet.vue'),
+        component: () => import('@/views/datasource/dataset/index.vue'),
         meta: { title: '数据集配置' },
       },
       {
         path: 'datasource/codeset-calibration',
         name: 'CodesetCalibration',
-        component: () => import('@/views/DataSource/CodesetCalibration.vue'),
+        component: () => import('@/views/datasource/codeset-calibration/index.vue'),
         meta: { title: '代码集校准' },
       },
       {
