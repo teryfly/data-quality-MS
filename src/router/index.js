@@ -155,4 +155,24 @@ router.beforeEach((to, from, next) => {
   next()
 })
 
+// Recover from Vite "Outdated Optimize Dep" / chunk load failures, which surface as
+// "Failed to fetch dynamically imported module" during route navigation. Without this,
+// router.push silently cancels and the user appears stuck on the previous page.
+const isChunkLoadError = (err) => {
+  const msg = err?.message || ''
+  return (
+    /Failed to fetch dynamically imported module/i.test(msg) ||
+    /Importing a module script failed/i.test(msg) ||
+    /error loading dynamically imported module/i.test(msg) ||
+    /Outdated Optimize Dep/i.test(msg)
+  )
+}
+
+router.onError((err, to) => {
+  if (isChunkLoadError(err)) {
+    const target = to?.fullPath || window.location.pathname + window.location.search
+    window.location.replace(target)
+  }
+})
+
 export default router

@@ -21,4 +21,19 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  // Pre-bundle heavy deps used by lazy-loaded routes. Without this, Vite's dep
+  // optimizer can re-run after MSW boots, returning 504 "Outdated Optimize Dep"
+  // for the first /layout & /dashboard chunk requests and aborting the post-login
+  // navigation.
+  optimizeDeps: {
+    include: [
+      'vue',
+      'vue-router',
+      'pinia',
+      'axios',
+      'echarts',
+      'element-plus',
+      '@element-plus/icons-vue',
+    ],
+  },
 })
