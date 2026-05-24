@@ -41,7 +41,7 @@ const routes = [
       {
         path: 'upload-monitor',
         name: 'UploadMonitor',
-        component: () => import('@/views/UploadMonitor/index.vue'),
+        component: () => import('@/views/upload-monitor/index.vue'),
         meta: { title: '数据上传监控' },
       },
       {
