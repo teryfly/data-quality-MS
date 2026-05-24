@@ -18,7 +18,7 @@
             <el-icon title="拖拽排序"><Sort /></el-icon>
           </template>
           <template #default>
-            <el-icon class="drag-handle" style="cursor:grab;color:#c0c4cc"><DragDot /></el-icon>
+            <el-icon class="drag-handle" style="cursor:grab;color:#c0c4cc"><Rank /></el-icon>
           </template>
         </el-table-column>
 
@@ -70,7 +70,7 @@
 
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
-import { Plus, Sort, DragDot } from '@element-plus/icons-vue'
+import { Plus, Sort, Rank } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import axios from 'axios'
 import Sortable from 'sortablejs'

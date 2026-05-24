@@ -126,6 +126,12 @@
           <template #title>数据质量报告</template>
         </el-menu-item>
 
+        <!-- 通知消息 — 全部登录用户可见 -->
+        <el-menu-item index="/notification">
+          <el-icon><Bell /></el-icon>
+          <template #title>通知消息</template>
+        </el-menu-item>
+
         <!-- 系统管理 -->
         <el-sub-menu
           v-if="hasSystemMenu"
@@ -167,7 +173,7 @@ import {
   DataBoard, DataLine, Grid, EditPen, Upload,
   DocumentCopy, Tickets, Document, CopyDocument, VideoPlay,
   Monitor, TrendCharts, Histogram, Warning,
-  Memo, Setting, OfficeBuilding, User, UserFilled,
+  Memo, Setting, OfficeBuilding, User, UserFilled, Bell,
 } from '@element-plus/icons-vue'
 import { useUiStore } from '@/store/ui'
 import { useAuthStore } from '@/store/auth'

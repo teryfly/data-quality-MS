@@ -110,6 +110,12 @@ const routes = [
         component: () => import('@/views/System/Role.vue'),
         meta: { title: '角色管理' },
       },
+      {
+        path: 'notification',
+        name: 'Notification',
+        component: () => import('@/views/Notification/index.vue'),
+        meta: { title: '通知消息' },
+      },
     ],
   },
   {
@@ -139,17 +145,20 @@ router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
 
   if (to.meta.requiresAuth === false) {
+    // 已登录用户访问 /login，重定向到 redirect 参数或首页
+    if (to.path === '/login' && authStore.token) {
+      const redirect = to.query.redirect
+      next(redirect && redirect !== '/login' ? redirect : '/dashboard')
+      return
+    }
     next()
     return
   }
 
   if (!authStore.token) {
-    next('/login')
+    // 保存目标路径，登录后跳回
+    next({ path: '/login', query: { redirect: to.fullPath } })
     return
-  }
-
-  if (authStore.permissions.length === 0) {
-    // TODO: refresh permissions from API
   }
 
   next()

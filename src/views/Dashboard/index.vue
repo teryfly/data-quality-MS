@@ -297,7 +297,19 @@
 </template>
 
 <script setup>
-import * as echarts from 'echarts'
+import * as echarts from 'echarts/core'
+import { LineChart, PieChart as EChartsPie } from 'echarts/charts'
+import {
+  GridComponent, TooltipComponent, LegendComponent,
+} from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
+
+// 按需注册 + 使用 CanvasRenderer（性能更好）
+echarts.use([
+  LineChart, EChartsPie,
+  GridComponent, TooltipComponent, LegendComponent,
+  CanvasRenderer,
+])
 import {
   Refresh, Warning,
   DataAnalysis, WarningFilled, PieChart, CircleCheckFilled,

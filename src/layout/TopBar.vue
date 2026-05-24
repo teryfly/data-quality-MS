@@ -24,18 +24,8 @@
         </el-icon>
       </el-tooltip>
 
-      <!-- Notification bell with badge -->
-      <el-tooltip content="通知消息" placement="bottom">
-        <div class="notification-wrap" @click="handleNotification">
-          <el-badge
-            :value="uiStore.notificationCount > 99 ? '99+' : uiStore.notificationCount"
-            :hidden="uiStore.notificationCount === 0"
-            type="danger"
-          >
-            <el-icon class="action-icon"><Bell /></el-icon>
-          </el-badge>
-        </div>
-      </el-tooltip>
+      <!-- Notification bell with popover panel -->
+      <NotificationBell />
 
       <!-- Org tag -->
       <el-tag
@@ -78,12 +68,13 @@
 
 <script setup>
 import {
-  Expand, Fold, FullScreen, ZoomOut, Bell,
+  Expand, Fold, FullScreen, ZoomOut,
   UserFilled, Key, SwitchButton,
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useUiStore } from '@/store/ui'
 import { useAuthStore } from '@/store/auth'
+import NotificationBell from '@/components/NotificationBell/index.vue'
 
 const uiStore = useUiStore()
 const authStore = useAuthStore()
@@ -104,10 +95,6 @@ const toggleFullscreen = () => {
 document.addEventListener('fullscreenchange', () => {
   isFullscreen.value = !!document.fullscreenElement
 })
-
-const handleNotification = () => {
-  ElMessage.info('通知功能开发中')
-}
 
 const handleCommand = (command) => {
   if (command === 'logout') {

@@ -44,15 +44,32 @@ export const notificationHandlers = [
     const url = new URL(request.url)
     const page = Number(url.searchParams.get('page')) || 1
     const size = Number(url.searchParams.get('size')) || 20
-    const all = getNotifications()
+    const typeFilter = url.searchParams.get('type') || ''
+    const isReadParam = url.searchParams.get('isRead')
+
+    let all = getNotifications()
+
+    // 按类型过滤
+    if (typeFilter) {
+      all = all.filter(n => n.type === typeFilter)
+    }
+
+    // 按已读状态过滤
+    if (isReadParam !== null && isReadParam !== '') {
+      const isReadVal = Number(isReadParam)
+      all = all.filter(n => n.isRead === isReadVal)
+    }
+
+    const total = all.length
     const start = (page - 1) * size
     const end = start + size
+
     return HttpResponse.json({
       code: 200,
       message: '成功',
       data: {
         records: all.slice(start, end),
-        total: all.length,
+        total,
         page,
         size
       }

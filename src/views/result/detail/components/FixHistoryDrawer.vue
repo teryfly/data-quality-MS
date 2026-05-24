@@ -23,7 +23,7 @@
             <span class="node-time">{{ item.timestamp }}</span>
             <span class="node-operator" :class="`op-${item.operatorType}`">
               <el-icon size="13" style="margin-right: 2px">
-                <component :is="item.operatorType === 'system' ? Cpu : User" />
+                <component :is="item.operatorType === 'system' ? Setting : User" />
               </el-icon>
               {{ item.operator }}
             </span>
@@ -39,7 +39,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { User, Cpu } from '@element-plus/icons-vue'
+import { User, Setting } from '@element-plus/icons-vue'
 import { getFixHistory } from '@/api/result'
 
 const props = defineProps({
@@ -91,13 +91,13 @@ function nodeColor(item) {
   if (item.operatorType === 'system') {
     if (/通过|✓/.test(item.action)) return '#52c41a'
     if (/未通过|失败|✗/.test(item.action)) return '#ff4d4f'
-    return '#1890ff'
+    return '#1890ff'  // 系统自动节点：蓝色
   }
-  return '#1890ff'
+  return '#909399'  // 人工操作节点：灰色
 }
 
 function nodeIcon(item) {
-  return item.operatorType === 'system' ? Cpu : User
+  return item.operatorType === 'system' ? Setting : User
 }
 
 function actionClass(item) {
