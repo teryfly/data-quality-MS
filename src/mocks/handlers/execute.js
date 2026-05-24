@@ -40,7 +40,16 @@ export const executeHandlers = [
     }
 
     const progress = executionProgress[executionId]
-    const details = mockExecutionDetails['EXEC-20260524-001'] || {}
+    const totalOrgs = 8
+    const doneOrgs = Math.floor(progress / 100 * totalOrgs)
+    const orgNames = ['达州市中医医院','达州市中心医院','通川区人民医院','通川区社区卫生服务中心','达县人民医院','宣汉县人民医院','开江县中医院','大竹县人民医院']
+    const orgProgress = orgNames.map((name, i) => ({
+      orgName: name,
+      status: i < doneOrgs ? 'done' : i === doneOrgs ? 'running' : 'pending',
+      execRules: i < doneOrgs ? '35/35' : i === doneOrgs ? `${Math.floor(progress % 100 * 0.35)}/35` : '0/35',
+      problemCount: i < doneOrgs ? Math.floor(Math.random() * 200 + 50) : null,
+      duration: i < doneOrgs ? `${Math.floor(Math.random() * 3 + 1)}m${Math.floor(Math.random() * 59)}s` : null
+    }))
 
     return HttpResponse.json({
       code: 200,
@@ -49,8 +58,8 @@ export const executeHandlers = [
         executionId,
         progress,
         status: progress >= 100 ? 'done' : 'running',
-        orgProgress: details.orgProgress || [],
-        logs: details.logs || []
+        orgProgress,
+        logs: []
       }
     })
   }),

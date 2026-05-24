@@ -41,7 +41,27 @@
       <el-button v-permission="'rule:delete'" type="danger" plain :disabled="!selectedIds.length" @click="handleBatchDelete">批量删除</el-button>
       <el-button v-permission="'rule:import'" :icon="Upload" @click="importVisible = true">导入</el-button>
       <el-button v-permission="'rule:export'" :icon="Download" :loading="exporting" @click="handleExport">导出</el-button>
+      <el-button v-if="selectedIds.length" type="success" :icon="CollectionTag" @click="saveTemplateVisible = true">保存为模板</el-button>
     </div>
+
+    <!-- 保存为模板弹窗 -->
+    <el-dialog v-model="saveTemplateVisible" title="保存为模板" width="440px" destroy-on-close>
+      <el-form ref="saveTemplateFormRef" :model="saveTemplateForm" :rules="saveTemplateRules" label-width="80px">
+        <el-form-item label="模板名称" prop="templateName">
+          <el-input v-model="saveTemplateForm.templateName" placeholder="请输入模板名称" />
+        </el-form-item>
+        <el-form-item label="模板描述" prop="description">
+          <el-input v-model="saveTemplateForm.description" type="textarea" :rows="3" placeholder="请输入模板描述" />
+        </el-form-item>
+        <el-form-item>
+          <span style="color:#909399;font-size:13px">将保存已选 {{ selectedIds.length }} 条规则</span>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="saveTemplateVisible = false">取消</el-button>
+        <el-button type="primary" :loading="savingTemplate" @click="handleSaveTemplate">保存</el-button>
+      </template>
+    </el-dialog>
 
     <!-- Table -->
     <el-card>
@@ -133,7 +153,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { Plus, Upload, Download } from '@element-plus/icons-vue'
+import { Plus, Upload, Download, CollectionTag } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import axios from 'axios'
 import RuleFormDialog from './components/RuleFormDialog.vue'
@@ -153,6 +173,32 @@ const query = ref({ page: 1, size: 20, ruleName: '', categoryId: null, ruleLevel
 const selectedIds = computed(() => selectedRows.value.map(r => r.id))
 
 const tableRef = ref(null)
+
+const saveTemplateVisible = ref(false)
+const savingTemplate = ref(false)
+const saveTemplateFormRef = ref(null)
+const saveTemplateForm = ref({ templateName: '', description: '' })
+const saveTemplateRules = {
+  templateName: [{ required: true, message: '请输入模板名称', trigger: 'blur' }]
+}
+
+async function handleSaveTemplate() {
+  await saveTemplateFormRef.value?.validate()
+  savingTemplate.value = true
+  try {
+    await axios.post('/api/template', {
+      ...saveTemplateForm.value,
+      ruleIds: selectedIds.value
+    })
+    ElMessage.success('模板保存成功')
+    saveTemplateVisible.value = false
+    saveTemplateForm.value = { templateName: '', description: '' }
+  } catch {
+    ElMessage.error('保存失败')
+  } finally {
+    savingTemplate.value = false
+  }
+}
 
 const levelType = (l) => l === 1 ? 'danger' : l === 2 ? 'warning' : 'primary'
 const levelLabel = (l) => l === 1 ? '严重' : l === 2 ? '警告' : '提示'

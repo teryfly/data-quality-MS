@@ -42,6 +42,13 @@ export const templateHandlers = [
     })
   }),
 
+  http.delete('/api/template/:id', async ({ params }) => {
+    await mockDelay()
+    const idx = mockTemplates.findIndex(t => t.id === Number(params.id))
+    if (idx !== -1) mockTemplates.splice(idx, 1)
+    return HttpResponse.json({ code: 200, message: '删除成功', data: null })
+  }),
+
   http.post('/api/template', async ({ request }) => {
     await mockDelay()
     const payload = await request.json()

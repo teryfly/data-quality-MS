@@ -36,4 +36,17 @@ export default defineConfig({
       '@element-plus/icons-vue',
     ],
   },
+  server: {
+    host: '0.0.0.0', // Listen on all network interfaces (use 'localhost' for local only)
+    port: 1580,       // Specify the port (default is 5173)
+    strictPort: false, // Set to true to exit if port is already in use
+//    cors: {
+  //    origin: 'https://cio.fhir.store',  // 允许特定域名
+      // 或者允许所有子域名和协议变体:
+      // origin: /https?:\/\/.*\.fhir\.store$/
+     // methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    //  credentials: true,   // 允许携带 cookies
+    //  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+   // },
+  },
 })
