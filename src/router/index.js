@@ -71,20 +71,20 @@ const routes = [
       {
         path: 'result/overview',
         name: 'ResultOverview',
-        component: () => import('@/views/Result/Overview.vue'),
-        meta: { title: '全局统计' },
+        component: () => import('@/views/result/overview/index.vue'),
+        meta: { title: '全局统计', permission: 'result:view' },
       },
       {
         path: 'result/by-rule',
         name: 'ResultByRule',
-        component: () => import('@/views/Result/ByRule.vue'),
-        meta: { title: '按规则统计' },
+        component: () => import('@/views/result/by-rule/index.vue'),
+        meta: { title: '按规则统计', permission: 'result:view' },
       },
       {
         path: 'result/detail',
         name: 'ResultDetail',
-        component: () => import('@/views/Result/Detail.vue'),
-        meta: { title: '问题明细' },
+        component: () => import('@/views/result/detail/index.vue'),
+        meta: { title: '问题明细', permission: 'result:view' },
       },
       {
         path: 'report',
