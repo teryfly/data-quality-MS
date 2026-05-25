@@ -135,7 +135,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import axios from 'axios'
 import hljs from 'highlight.js/lib/core'
 import sql from 'highlight.js/lib/languages/sql'
@@ -338,20 +338,12 @@ const handleSave = async () => {
   }
 }
 
-const handleBeforeClose = async (done) => {
-  if (!isDirty.value) { done(); return }
-  try {
-    await ElMessageBox.confirm('有未保存的修改，确定关闭吗？', '提示', { type: 'warning' })
-    done()
-  } catch { /* cancelled */ }
+const handleBeforeClose = (done) => {
+  done()
 }
 
-const handleCancel = async () => {
-  if (!isDirty.value) { visible.value = false; return }
-  try {
-    await ElMessageBox.confirm('有未保存的修改，确定关闭吗？', '提示', { type: 'warning' })
-    visible.value = false
-  } catch { /* cancelled */ }
+const handleCancel = () => {
+  visible.value = false
 }
 </script>
 

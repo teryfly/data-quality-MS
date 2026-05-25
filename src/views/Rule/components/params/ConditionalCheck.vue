@@ -1,9 +1,17 @@
 <template>
-  <el-form-item label="数据集" prop="params.datasetId" :rules="req('数据集')">
-    <el-select v-model="model.datasetId" placeholder="选择数据集" filterable clearable style="width:100%" @change="onDS">
-      <el-option v-for="ds in datasets" :key="ds.id" :label="ds.datasetName" :value="ds.id" />
-    </el-select>
-  </el-form-item>
+  <div>
+    <div style="margin-bottom:16px;font-weight:600;color:#606266">选择数据集</div>
+    <el-form-item label=" " prop="params.datasetId" :rules="req('数据集')" style="margin-bottom:16px">
+      <DatasetElementSelector
+        :model-value="{ datasetId: model.datasetId, elementIds: [] }"
+        :datasets="datasets"
+        data-set-label="数据集"
+        element-label="字段参考"
+        selection-label="已选"
+        :multiple="false"
+        @update:model-value="onDatasetChange"
+      />
+    </el-form-item>
 
   <!-- condition_expr -->
   <el-form-item label="条件表达式" prop="params.conditionExpr" :rules="req('条件表达式')">
@@ -59,18 +67,18 @@
       <template v-else>✗ 错误：{{ validateResult.error }}</template>
     </div>
   </el-form-item>
+  </div>
 </template>
 <script setup>
 import { ref, watch } from 'vue'
 import axios from 'axios'
-import { useDatasetElements } from './useDatasetElements.js'
+import DatasetElementSelector from './DatasetElementSelector.vue'
 
 const props = defineProps({
   modelValue: { type: Object, default: () => ({}) },
   datasets: { type: Array, default: () => [] },
 })
 const emit = defineEmits(['update:modelValue', 'validate-result'])
-const { fetchElements } = useDatasetElements()
 const req = (name) => [{ required: true, message: `${name}不能为空`, trigger: 'blur' }]
 
 const model = ref({ datasetId: null, conditionExpr: '', resultExpr: '', ...props.modelValue })
@@ -80,7 +88,9 @@ const validateResult = ref(null)
 watch(model, (v) => emit('update:modelValue', { ...v }), { deep: true })
 watch(() => props.modelValue, (v) => { if (v) model.value = { ...model.value, ...v } }, { deep: true })
 
-const onDS = () => fetchElements(model.value.datasetId)
+const onDatasetChange = (val) => {
+  model.value.datasetId = val.datasetId
+}
 
 const handleValidate = async () => {
   validating.value = true

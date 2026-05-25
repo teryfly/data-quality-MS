@@ -150,9 +150,10 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import axios from 'axios'
+import { showWarningConfirm } from '@/utils/dialog'
 
 const tableData = ref([])
 const tableLoading = ref(false)
@@ -264,10 +265,10 @@ function handleViewItems(row) {
 
 async function handleMarkExcluded(row) {
   try {
-    await ElMessageBox.confirm(
+    await showWarningConfirm(
       `确认将"${row.codesetName}"标记为误识别？后续自动同步将不再创建此代码集。`,
       '标记误识别',
-      { confirmButtonText: '确认标记', cancelButtonText: '取消', type: 'warning' }
+      { confirmButtonText: '确认标记' }
     )
     await axios.put(`/api/codeset/${row.id}/calibrate`, { status: 'excluded' })
     ElMessage.success('已标记为误识别')
@@ -311,8 +312,8 @@ async function handleEditSave() {
 
 function handleEditCancel() {
   if (editDirty.value) {
-    ElMessageBox.confirm('有未保存的更改，确定要关闭吗？', '提示', {
-      confirmButtonText: '确定关闭', cancelButtonText: '继续编辑', type: 'warning'
+    showWarningConfirm('有未保存的更改，确定要关闭吗？', '提示', {
+      confirmButtonText: '确定关闭', cancelButtonText: '继续编辑'
     }).then(() => { editDialogVisible.value = false }).catch(() => {})
   } else {
     editDialogVisible.value = false
@@ -321,8 +322,8 @@ function handleEditCancel() {
 
 function handleEditBeforeClose(done) {
   if (editDirty.value) {
-    ElMessageBox.confirm('有未保存的更改，确定要关闭吗？', '提示', {
-      confirmButtonText: '确定关闭', cancelButtonText: '继续编辑', type: 'warning'
+    showWarningConfirm('有未保存的更改，确定要关闭吗？', '提示', {
+      confirmButtonText: '确定关闭', cancelButtonText: '继续编辑'
     }).then(() => done()).catch(() => {})
   } else {
     done()

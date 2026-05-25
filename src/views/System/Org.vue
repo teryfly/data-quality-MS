@@ -95,8 +95,9 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+import { showWarningConfirm } from '@/utils/dialog'
 import { getOrgList, updateOrg } from '@/api/system.js'
 import OrgFormDialog from './components/OrgFormDialog.vue'
 
@@ -179,10 +180,9 @@ function handleEdit(row) {
 async function handleToggleStatus(row) {
   const action = row.status === 1 ? '禁用' : '启用'
   try {
-    await ElMessageBox.confirm(
+    await showWarningConfirm(
       `确定要${action}机构「${row.orgName}」吗？`,
-      `确认${action}`,
-      { type: 'warning', confirmButtonText: '确定', cancelButtonText: '取消' }
+      `确认${action}`
     )
     await updateOrg(row.id, { ...row, status: row.status === 1 ? 0 : 1 })
     ElMessage.success(`${action}成功`)

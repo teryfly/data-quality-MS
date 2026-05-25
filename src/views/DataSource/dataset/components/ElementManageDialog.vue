@@ -115,9 +115,10 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { Search, Plus } from '@element-plus/icons-vue'
 import axios from 'axios'
+import { showDeleteConfirm } from '@/utils/dialog'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -247,10 +248,8 @@ async function handleSaveElement() {
 }
 
 async function handleDelete(row) {
-  await ElMessageBox.confirm(
-    `确定要删除数据元「${row.elementName}（${row.elementCode}）」？此操作不可恢复。`,
-    '删除确认',
-    { type: 'warning', confirmButtonText: '确定删除', cancelButtonText: '取消' }
+  await showDeleteConfirm(
+    `确定要删除数据元「${row.elementName}（${row.elementCode}）」？此操作不可恢复。`
   )
   try {
     await axios.delete(`/api/dataset/${props.dataset.id}/elements/${row.id}`)

@@ -1,58 +1,56 @@
 <template>
-  <!-- Main table -->
-  <div style="margin-bottom:4px;font-weight:600;color:#606266">主表</div>
-  <el-form-item label="主数据集" prop="params.mainDatasetId" :rules="req('主数据集')">
-    <el-select v-model="model.mainDatasetId" placeholder="选择数据集" filterable clearable style="width:100%" @change="onMainDS">
-      <el-option v-for="ds in datasets" :key="ds.id" :label="ds.datasetName" :value="ds.id" />
-    </el-select>
-  </el-form-item>
-  <el-form-item label="主字段" prop="params.mainFieldId" :rules="req('主字段')">
-    <el-select v-model="model.mainFieldId" placeholder="选择字段" filterable clearable :loading="loadingMain" :disabled="!model.mainDatasetId" style="width:100%">
-      <el-option v-for="el in mainElements" :key="el.id" :label="elementLabel(el)" :value="el.id" />
-    </el-select>
-  </el-form-item>
+  <div>
+    <!-- Main table -->
+    <div style="margin-bottom:16px;font-weight:600;color:#606266">主表</div>
+    <el-form-item label="选择字段" prop="params.mainDatasetId" :rules="req('主数据集')">
+      <DatasetElementSelector
+        :model-value="{ datasetId: model.mainDatasetId, elementIds: model.mainFieldId ? [model.mainFieldId] : [] }"
+        :datasets="datasets"
+        data-set-label="数据集"
+        element-label="字段"
+        selection-label="已选字段"
+        :multiple="false"
+        @update:model-value="onMainChange"
+      />
+    </el-form-item>
 
-  <el-divider />
+    <el-divider style="margin:20px 0" />
 
-  <!-- Referenced table -->
-  <div style="margin-bottom:4px;font-weight:600;color:#606266">被引用表</div>
-  <el-form-item label="被引用数据集" prop="params.refDatasetId" :rules="req('被引用数据集')">
-    <el-select v-model="model.refDatasetId" placeholder="选择数据集" filterable clearable style="width:100%" @change="onRefDS">
-      <el-option v-for="ds in datasets" :key="ds.id" :label="ds.datasetName" :value="ds.id" />
-    </el-select>
-  </el-form-item>
-  <el-form-item label="被引用字段" prop="params.refFieldId" :rules="req('被引用字段')">
-    <el-select v-model="model.refFieldId" placeholder="选择字段" filterable clearable :loading="loadingRef" :disabled="!model.refDatasetId" style="width:100%">
-      <el-option v-for="el in refElements" :key="el.id" :label="elementLabel(el)" :value="el.id" />
-    </el-select>
-  </el-form-item>
+    <!-- Referenced table -->
+    <div style="margin-bottom:16px;font-weight:600;color:#606266">被引用表</div>
+    <el-form-item label="选择字段" prop="params.refDatasetId" :rules="req('被引用数据集')">
+      <DatasetElementSelector
+        :model-value="{ datasetId: model.refDatasetId, elementIds: model.refFieldId ? [model.refFieldId] : [] }"
+        :datasets="datasets"
+        data-set-label="数据集"
+        element-label="字段"
+        selection-label="已选字段"
+        :multiple="false"
+        @update:model-value="onRefChange"
+      />
+    </el-form-item>
+  </div>
 </template>
 <script setup>
 import { ref, watch } from 'vue'
-import axios from 'axios'
+import DatasetElementSelector from './DatasetElementSelector.vue'
 
 const props = defineProps({ modelValue: { type: Object, default: () => ({}) }, datasets: { type: Array, default: () => [] } })
 const emit = defineEmits(['update:modelValue'])
 const req = (name) => [{ required: true, message: `${name}不能为空`, trigger: 'change' }]
-const elementLabel = (el) => el ? `${el.element_name}（${el.element_code}）` : ''
 
 const model = ref({ mainDatasetId: null, mainFieldId: null, refDatasetId: null, refFieldId: null, ...props.modelValue })
-const mainElements = ref([])
-const refElements = ref([])
-const loadingMain = ref(false)
-const loadingRef = ref(false)
 
 watch(model, (v) => emit('update:modelValue', { ...v }), { deep: true })
 watch(() => props.modelValue, (v) => { if (v) model.value = { ...model.value, ...v } }, { deep: true })
 
-const fetchEls = async (dsId, target, loading) => {
-  target.value = []; if (!dsId) return
-  loading.value = true
-  try { const { data } = await axios.get(`/api/dataset/${dsId}/elements`); target.value = data.data?.records || data.data || [] } finally { loading.value = false }
+const onMainChange = (val) => {
+  model.value.mainDatasetId = val.datasetId
+  model.value.mainFieldId = val.elementIds?.[0] || null
 }
-const onMainDS = () => { model.value.mainFieldId = null; fetchEls(model.value.mainDatasetId, mainElements, loadingMain) }
-const onRefDS = () => { model.value.refFieldId = null; fetchEls(model.value.refDatasetId, refElements, loadingRef) }
 
-if (model.value.mainDatasetId) fetchEls(model.value.mainDatasetId, mainElements, loadingMain)
-if (model.value.refDatasetId) fetchEls(model.value.refDatasetId, refElements, loadingRef)
+const onRefChange = (val) => {
+  model.value.refDatasetId = val.datasetId
+  model.value.refFieldId = val.elementIds?.[0] || null
+}
 </script>

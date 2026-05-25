@@ -116,8 +116,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import axios from 'axios'
+import { showWarningConfirm } from '@/utils/dialog'
 import DatasourceFormDialog from './components/DatasourceFormDialog.vue'
 import SyncProgressDialog from './components/SyncProgressDialog.vue'
 import DatasourceCard from './components/DatasourceCard.vue'
@@ -192,10 +193,9 @@ async function handleTest(source) {
 }
 
 function handleSync(source) {
-  ElMessageBox.confirm(
+  showWarningConfirm(
     '将立即同步值域代码库，可能耗时数分钟，是否继续？',
-    '确认同步',
-    { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
+    '确认同步'
   ).then(() => {
     triggerSync(source.id)
   }).catch(() => {})

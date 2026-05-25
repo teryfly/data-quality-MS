@@ -154,8 +154,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { Plus, Upload, Download, CollectionTag } from '@element-plus/icons-vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import axios from 'axios'
+import { showWarningConfirm } from '@/utils/dialog'
 import RuleFormDialog from './components/RuleFormDialog.vue'
 import ImportDialog from './components/ImportDialog.vue'
 
@@ -261,7 +262,7 @@ const handleBatchEnable = async (enable) => {
 }
 
 const handleBatchDelete = async () => {
-  await ElMessageBox.confirm(`确定批量删除选中的 ${selectedIds.value.length} 条规则吗？`, '警告', { type: 'warning' })
+  await showWarningConfirm(`确定批量删除选中的 ${selectedIds.value.length} 条规则吗？`, '警告')
   await axios.delete('/api/rule/batch', { data: { ruleIds: selectedIds.value } })
   ElMessage.success('批量删除成功')
   fetchData()

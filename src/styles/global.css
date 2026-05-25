@@ -113,8 +113,30 @@ body {
 
 .el-message-box__content {
   padding: 10px 20px;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  line-height: 1.5;
 }
 
 .el-message-box__btns {
   padding: 0 20px 20px;
+}
+
+/* Centered Message Box Dialog */
+.el-message-box {
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 4px;
+  max-width: 420px;
+}
+
+.el-message-box__header {
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+/* Optimize button spacing */
+.el-message-box__btns {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }

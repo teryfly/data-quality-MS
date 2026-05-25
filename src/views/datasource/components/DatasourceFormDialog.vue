@@ -110,9 +110,10 @@
 
 <script setup>
 import { ref, reactive, computed, watch } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { CircleCheck, CircleClose } from '@element-plus/icons-vue'
 import axios from 'axios'
+import { showWarningConfirm, showInfoConfirm } from '@/utils/dialog'
 
 const props = defineProps({
   modelValue: Boolean,
@@ -269,10 +270,10 @@ async function handleSave() {
     emit('saved')
 
     if (form.sourceType === 'code') {
-      ElMessageBox.confirm(
+      showInfoConfirm(
         '是否立即触发代码库初始同步？',
         '触发同步',
-        { confirmButtonText: '立即同步', cancelButtonText: '稍后再说', type: 'info' }
+        { confirmButtonText: '立即同步', cancelButtonText: '稍后再说' }
       ).then(() => {
         emit('sync-now', savedId)
       }).catch(() => {})
@@ -286,10 +287,9 @@ async function handleSave() {
 
 function handleCancel() {
   if (isDirty.value) {
-    ElMessageBox.confirm('有未保存的更改，确定要关闭吗？', '提示', {
+    showWarningConfirm('有未保存的更改，确定要关闭吗？', '提示', {
       confirmButtonText: '确定关闭',
-      cancelButtonText: '继续编辑',
-      type: 'warning'
+      cancelButtonText: '继续编辑'
     }).then(() => {
       visible.value = false
     }).catch(() => {})
@@ -300,10 +300,9 @@ function handleCancel() {
 
 function handleBeforeClose(done) {
   if (isDirty.value) {
-    ElMessageBox.confirm('有未保存的更改，确定要关闭吗？', '提示', {
+    showWarningConfirm('有未保存的更改，确定要关闭吗？', '提示', {
       confirmButtonText: '确定关闭',
-      cancelButtonText: '继续编辑',
-      type: 'warning'
+      cancelButtonText: '继续编辑'
     }).then(() => done()).catch(() => {})
   } else {
     done()

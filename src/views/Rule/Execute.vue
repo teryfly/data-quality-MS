@@ -240,8 +240,9 @@
 <script setup>
 import { ref, computed, onMounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import axios from 'axios'
+import { showWarningConfirm } from '@/utils/dialog'
 import PageContainer from '@/components/PageContainer/index.vue'
 import { useExecution } from './execute/useExecution.js'
 import { mockOrgs } from '@/mocks/data/orgs.js'
@@ -361,7 +362,7 @@ function handleClear() {
 }
 
 async function handleCancelConfirm() {
-  await ElMessageBox.confirm('确认取消当前执行批次？', '提示', { type: 'warning' })
+  await showWarningConfirm('确认取消当前执行批次？')
   stopPolling()
   clearInterval(elapsedTimer)
   ElMessage.info('已取消执行')

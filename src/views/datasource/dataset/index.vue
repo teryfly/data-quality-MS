@@ -121,9 +121,10 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import axios from 'axios'
+import { showDeleteConfirm } from '@/utils/dialog'
 import DatasetFormDialog from './components/DatasetFormDialog.vue'
 import SyncPreviewDialog from './components/SyncPreviewDialog.vue'
 import ElementManageDialog from './components/ElementManageDialog.vue'
@@ -221,10 +222,8 @@ async function handleStatusChange(row, val) {
 
 async function handleDelete(row) {
   try {
-    await ElMessageBox.confirm(
-      `确定要删除数据集「${row.datasetName}」？删除后该数据集下的所有数据元也将被移除，且已引用该数据集的质控规则可能失效。`,
-      '删除确认',
-      { type: 'warning', confirmButtonText: '确定删除', cancelButtonText: '取消' }
+    await showDeleteConfirm(
+      `确定要删除数据集「${row.datasetName}」？删除后该数据集下的所有数据元也将被移除，且已引用该数据集的质控规则可能失效。`
     )
   } catch {
     return

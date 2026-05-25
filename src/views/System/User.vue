@@ -134,8 +134,9 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
+import { showWarningConfirm } from '@/utils/dialog'
 import { getUserList, updateUser, getOrgList, getRoleList } from '@/api/system.js'
 import UserFormDialog from './components/UserFormDialog.vue'
 import ResetPasswordDialog from './components/ResetPasswordDialog.vue'
@@ -235,10 +236,9 @@ function handlePwdResetSuccess() {
 async function handleToggleStatus(row) {
   const action = row.status === 1 ? '禁用' : '启用'
   try {
-    await ElMessageBox.confirm(
+    await showWarningConfirm(
       `确定要${action}用户「${row.realName}（${row.username}）」吗？`,
-      `确认${action}`,
-      { type: 'warning', confirmButtonText: '确定', cancelButtonText: '取消' }
+      `确认${action}`
     )
     await updateUser(row.id, { ...row, status: row.status === 1 ? 0 : 1 })
     ElMessage.success(`${action}成功`)
