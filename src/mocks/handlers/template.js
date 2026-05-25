@@ -66,7 +66,7 @@ export const templateHandlers = [
       ruleIds: payload.ruleIds || [],
       rules: payload.rules || [],
     }
-    mockTemplates.push(newTemplate)
+    mockTemplates.unshift(newTemplate)
     return HttpResponse.json({
       code: 200,
       message: '模板保存成功',

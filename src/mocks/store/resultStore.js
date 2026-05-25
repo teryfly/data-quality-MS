@@ -16,7 +16,7 @@ const statusLabel = (s) => ({
 
 function appendHistory(id, entry) {
   if (!fixHistoryStore[id]) fixHistoryStore[id] = []
-  fixHistoryStore[id].push(entry)
+  fixHistoryStore[id].unshift(entry)
 }
 
 export const updateFix = (id, fixStatus, fixDescription = '', operator = '当前用户') => {

@@ -7,16 +7,18 @@
       </el-breadcrumb-item>
       <el-breadcrumb-item
         v-for="(item, index) in breadcrumbs"
-        :key="item.path"
-        :to="index < breadcrumbs.length - 1 ? { path: item.path } : undefined"
+        :key="item.path || item.title || index"
+        :to="item.path && index < breadcrumbs.length - 1 ? { path: item.path } : undefined"
       >
-        {{ item.label }}
+        {{ item.label || item.title }}
       </el-breadcrumb-item>
     </el-breadcrumb>
   </div>
 </template>
 
 <script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { HomeFilled } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -25,7 +27,12 @@ const breadcrumbs = computed(() => {
   // Skip breadcrumb on dashboard itself (home = dashboard)
   if (route.path === '/dashboard' || route.path === '/') return []
 
-  // Use matched routes filtered by having a title in meta
+  // Priority: use route.meta.breadcrumb if available (complete hierarchy)
+  if (Array.isArray(route.meta?.breadcrumb)) {
+    return route.meta.breadcrumb
+  }
+
+  // Fallback: extract from matched routes
   return route.matched
     .filter(r => r.meta?.title)
     .map(r => ({

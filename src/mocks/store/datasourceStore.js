@@ -11,7 +11,7 @@ export const addDatasource = (datasource) => {
     createTime: new Date().toISOString().replace('T', ' ').slice(0, 19),
     connectStatus: -1
   }
-  datasourcesStore.push(newDatasource)
+  datasourcesStore.unshift(newDatasource)
   return newDatasource
 }
 

@@ -30,7 +30,7 @@ export const addCodeset = (data) => {
     id: nextId++,
     codesetCode: data.codesetCode || `CUSTOM_${Date.now()}`,
   }
-  store.push(newCodeset)
+  store.unshift(newCodeset)
   return newCodeset
 }
 

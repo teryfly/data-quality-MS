@@ -12,6 +12,11 @@
         <slot />
       </div>
 
+      <!-- Custom actions (if provided by slot) -->
+      <div class="search-custom-actions">
+        <slot name="actions" />
+      </div>
+
       <!-- Fixed action buttons -->
       <div class="search-actions">
         <!-- Expand/collapse toggle (only when collapsible and has >4 fields) -->
@@ -118,13 +123,22 @@ function handleReset() {
   color: var(--color-text-secondary, #606266);
 }
 
-.search-actions {
+.search-custom-actions {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
   flex-shrink: 0;
   margin-left: auto;
+}
+
+.search-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-shrink: 0;
+  margin-left: 8px;
 }
 
 .toggle-btn {

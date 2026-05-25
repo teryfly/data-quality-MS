@@ -20,7 +20,7 @@ export const ruleHandlers = [
     await mockDelay()
     const body = await request.json()
     const newCat = { id: categoryIdSeq++, ...body }
-    categoriesStore.push(newCat)
+    categoriesStore.unshift(newCat)
     return HttpResponse.json({ code: 200, message: '创建成功', data: newCat })
   }),
 

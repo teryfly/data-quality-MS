@@ -10,7 +10,7 @@ let rolesStore = JSON.parse(JSON.stringify(mockRoles))
 export const getOrgs = () => orgsStore
 export const addOrg = (org) => {
   const newOrg = { ...org, id: Math.max(...orgsStore.map(o => o.id), 0) + 1, status: 1 }
-  orgsStore.push(newOrg)
+  orgsStore.unshift(newOrg)
   return newOrg
 }
 export const updateOrg = (id, patch) => {
@@ -29,7 +29,7 @@ export const deleteOrg = (id) => {
 export const getUsers = () => usersStore
 export const addUser = (user) => {
   const newUser = { ...user, id: Math.max(...usersStore.map(u => u.id), 0) + 1, status: 1 }
-  usersStore.push(newUser)
+  usersStore.unshift(newUser)
   return newUser
 }
 export const updateUser = (id, patch) => {
@@ -56,7 +56,7 @@ export const resetPassword = (id, newPassword) => {
 export const getRoles = () => rolesStore
 export const addRole = (role) => {
   const newRole = { ...role, id: Math.max(...rolesStore.map(r => r.id), 0) + 1 }
-  rolesStore.push(newRole)
+  rolesStore.unshift(newRole)
   return newRole
 }
 export const updateRole = (id, patch) => {

@@ -17,18 +17,17 @@
           <el-option label="误识别" value="excluded" />
         </el-select>
       </el-form-item>
+      <template #actions>
+        <el-button
+          v-permission="'codeset:calibrate'"
+          type="primary"
+          :icon="Plus"
+          @click="handleAdd"
+        >
+          添加代码集
+        </el-button>
+      </template>
     </SearchForm>
-
-    <div class="table-toolbar">
-      <el-button
-        v-permission="'codeset:calibrate'"
-        type="primary"
-        :icon="Plus"
-        @click="handleAdd"
-      >
-        手动添加代码集
-      </el-button>
-    </div>
 
     <DataTable
       :data="tableData"

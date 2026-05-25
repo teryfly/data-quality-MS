@@ -12,7 +12,7 @@ let datasetsStore = JSON.parse(JSON.stringify(mockDatasets))
 let elementsStore = {}
 for (const el of mockElements) {
   if (!elementsStore[el.datasetId]) elementsStore[el.datasetId] = []
-  elementsStore[el.datasetId].push({ ...el })
+  elementsStore[el.datasetId].unshift({ ...el })
 }
 
 let nextDatasetId = Math.max(...datasetsStore.map(d => d.id), 0) + 1
@@ -38,7 +38,7 @@ export const addDataset = (payload) => {
     status: 1,
     createTime: new Date().toISOString().replace('T', ' ').slice(0, 19),
   }
-  datasetsStore.push(newDs)
+  datasetsStore.unshift(newDs)
   elementsStore[newDs.id] = []
   return newDs
 }
@@ -76,7 +76,7 @@ export const addElement = (datasetId, payload) => {
     sortNo: payload.sortNo || 99,
     createTime: new Date().toISOString().replace('T', ' ').slice(0, 19),
   }
-  elementsStore[numId].push(newEl)
+  elementsStore[numId].unshift(newEl)
   return newEl
 }
 

@@ -10,7 +10,7 @@ export const addRule = (rule) => {
     id: Math.max(...rulesStore.map(r => r.id), 0) + 1,
     createTime: new Date().toISOString().replace('T', ' ').slice(0, 19)
   }
-  rulesStore.push(newRule)
+  rulesStore.unshift(newRule)
   return newRule
 }
 
