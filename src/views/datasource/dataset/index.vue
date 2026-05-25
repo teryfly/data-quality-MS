@@ -1,5 +1,15 @@
 <template>
   <PageContainer title="数据集配置">
+    <template #actions>
+      <el-button
+        v-permission="'dataset:edit'"
+        type="primary"
+        @click="handleAdd"
+      >
+        <el-icon><Plus /></el-icon>新增数据集
+      </el-button>
+    </template>
+
     <SearchForm :loading="tableLoading" @search="handleSearch" @reset="handleReset">
       <el-form-item label="数据集编码">
         <el-input v-model="queryParams.datasetCode" placeholder="请输入数据集编码" clearable style="width: 180px" />
@@ -29,13 +39,13 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="记录数" width="110" align="right">
+      <el-table-column label="记录数" width="120" align="right">
         <template #default="{ row }">
           {{ row.recordCount?.toLocaleString() ?? '-' }}
         </template>
       </el-table-column>
 
-      <el-table-column label="状态" width="100" align="center">
+      <el-table-column label="状态" width="90" align="center">
         <template #default="{ row }">
           <el-switch
             v-model="row.status"
@@ -46,8 +56,17 @@
         </template>
       </el-table-column>
 
-      <el-table-column label="操作" width="180" fixed="right" align="center">
+      <el-table-column label="操作" width="240" fixed="right" align="center">
         <template #default="{ row }">
+          <el-button
+            v-permission="'dataset:view'"
+            size="small"
+            type="info"
+            link
+            @click="handleManageElements(row)"
+          >
+            数据元
+          </el-button>
           <el-button
             v-permission="'dataset:edit'"
             size="small"
@@ -66,18 +85,35 @@
           >
             同步字段
           </el-button>
+          <el-button
+            v-permission="'dataset:edit'"
+            size="small"
+            type="danger"
+            link
+            @click="handleDelete(row)"
+          >
+            删除
+          </el-button>
         </template>
       </el-table-column>
     </DataTable>
 
+    <!-- Add/Edit Dialog -->
     <DatasetFormDialog
       v-model="editDialogVisible"
       :dataset="currentDataset"
       @saved="fetchData"
     />
 
+    <!-- Sync Preview Dialog -->
     <SyncPreviewDialog
       v-model="syncDialogVisible"
+      :dataset="currentDataset"
+    />
+
+    <!-- Element Management Dialog -->
+    <ElementManageDialog
+      v-model="elementDialogVisible"
       :dataset="currentDataset"
     />
   </PageContainer>
@@ -85,10 +121,12 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Plus } from '@element-plus/icons-vue'
 import axios from 'axios'
 import DatasetFormDialog from './components/DatasetFormDialog.vue'
 import SyncPreviewDialog from './components/SyncPreviewDialog.vue'
+import ElementManageDialog from './components/ElementManageDialog.vue'
 
 const tableData = ref([])
 const tableLoading = ref(false)
@@ -96,6 +134,7 @@ const isInit = ref(true)
 const total = ref(0)
 const editDialogVisible = ref(false)
 const syncDialogVisible = ref(false)
+const elementDialogVisible = ref(false)
 const currentDataset = ref(null)
 
 const queryParams = reactive({
@@ -150,9 +189,19 @@ function handleSizeChange(size) {
   fetchData()
 }
 
+function handleAdd() {
+  currentDataset.value = null
+  editDialogVisible.value = true
+}
+
 function handleEdit(row) {
   currentDataset.value = row
   editDialogVisible.value = true
+}
+
+function handleManageElements(row) {
+  currentDataset.value = row
+  elementDialogVisible.value = true
 }
 
 function handleSyncFields(row) {
@@ -167,6 +216,25 @@ async function handleStatusChange(row, val) {
   } catch {
     row.status = val ? 0 : 1
     ElMessage.error('状态修改失败')
+  }
+}
+
+async function handleDelete(row) {
+  try {
+    await ElMessageBox.confirm(
+      `确定要删除数据集「${row.datasetName}」？删除后该数据集下的所有数据元也将被移除，且已引用该数据集的质控规则可能失效。`,
+      '删除确认',
+      { type: 'warning', confirmButtonText: '确定删除', cancelButtonText: '取消' }
+    )
+  } catch {
+    return
+  }
+  try {
+    await axios.delete(`/api/dataset/${row.id}`)
+    ElMessage.success('数据集已删除')
+    fetchData()
+  } catch {
+    ElMessage.error('删除失败')
   }
 }
 

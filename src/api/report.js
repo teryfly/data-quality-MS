@@ -36,6 +36,15 @@ export function exportMonthlyReport(id) {
 }
 
 /**
+ * 生成月度报告（AI质控分析）
+ * @param {object} payload - { orgId, reportMonth }
+ * @returns {Promise}
+ */
+export function generateMonthlyReport(payload) {
+  return request.post('/api/report/generate', payload)
+}
+
+/**
  * 下载问题明细 Excel
  * @param {number|string} id - 报告ID
  * @returns {Promise<Blob>}

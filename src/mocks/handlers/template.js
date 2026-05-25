@@ -2,6 +2,9 @@ import { http, HttpResponse } from 'msw'
 import { mockDelay } from '../utils.js'
 import { mockTemplates } from '../data/templates.js'
 
+// Tracks ids for dynamically created user templates in this session
+let nextTemplateId = Math.max(...mockTemplates.map(t => t.id)) + 1
+
 export const templateHandlers = [
   http.get('/api/template', async ({ request }) => {
     await mockDelay()
@@ -52,10 +55,22 @@ export const templateHandlers = [
   http.post('/api/template', async ({ request }) => {
     await mockDelay()
     const payload = await request.json()
+    const newTemplate = {
+      id: nextTemplateId++,
+      templateName: payload.templateName || '未命名模板',
+      description: payload.description || '',
+      templateType: 'user',
+      isEnabled: 1,
+      createdBy: payload.createdBy || 'org_admin',
+      createTime: new Date().toISOString().replace('T', ' ').substring(0, 19),
+      ruleIds: payload.ruleIds || [],
+      rules: payload.rules || [],
+    }
+    mockTemplates.push(newTemplate)
     return HttpResponse.json({
       code: 200,
       message: '模板保存成功',
-      data: { templateId: Date.now(), templateName: payload.templateName }
+      data: { templateId: newTemplate.id, templateName: newTemplate.templateName }
     })
   })
 ]

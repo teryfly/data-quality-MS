@@ -40,8 +40,68 @@
             />
           </el-select>
         </el-form-item>
+
+        <!-- 生成报告按钮（dataScope<=2 或 report:export 权限可见） -->
+        <el-form-item v-if="canSelectOrg">
+          <el-button type="success" @click="generateDialogVisible = true">
+            <el-icon><MagicStick /></el-icon>
+            生成报告
+          </el-button>
+        </el-form-item>
       </el-form>
     </el-card>
+
+    <!-- 生成报告对话框 -->
+    <el-dialog
+      v-model="generateDialogVisible"
+      title="生成月度质控报告"
+      width="480px"
+      :close-on-click-modal="false"
+      destroy-on-close
+    >
+      <el-alert type="info" :closable="false" style="margin-bottom:16px">
+        系统将基于当月质控数据自动计算评分、问题分布并生成AI综合分析，预计耗时2-4秒。
+      </el-alert>
+      <el-form :model="generateForm" label-width="90px">
+        <el-form-item label="选择机构" required>
+          <el-select
+            v-model="generateForm.orgId"
+            placeholder="请选择机构"
+            filterable
+            style="width:100%"
+          >
+            <el-option
+              v-for="org in orgOptions"
+              :key="org.id"
+              :label="org.orgName"
+              :value="org.id"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="报告月份" required>
+          <el-date-picker
+            v-model="generateForm.reportMonth"
+            type="month"
+            value-format="YYYY-MM"
+            placeholder="选择月份"
+            style="width:100%"
+            :disabled-date="disabledFutureMonth"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="generateDialogVisible = false">取消</el-button>
+        <el-button
+          type="success"
+          :loading="generating"
+          :disabled="!generateForm.orgId || !generateForm.reportMonth"
+          @click="handleGenerateReport"
+        >
+          <el-icon><MagicStick /></el-icon>
+          {{ generating ? '生成中...' : '立即生成' }}
+        </el-button>
+      </template>
+    </el-dialog>
 
     <!-- ── 主体区：左导航 + 右内容 ──────────────────────────────────── -->
     <div class="report-layout">
@@ -274,8 +334,8 @@
 
 <script setup>
 import * as echarts from 'echarts'
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { ArrowUp, ArrowDown, Download, Document, Printer } from '@element-plus/icons-vue'
+import { ref, computed, onMounted, onUnmounted, nextTick, reactive } from 'vue'
+import { ArrowUp, ArrowDown, Download, Document, Printer, MagicStick } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useAuthStore } from '@/store/auth'
 import { formatNumber } from '@/utils/format'
@@ -284,6 +344,7 @@ import {
   getMonthlyReportDetail,
   exportMonthlyReport,
   downloadProblemDetail,
+  generateMonthlyReport,
 } from '@/api/report'
 import request from '@/utils/request'
 
@@ -652,6 +713,51 @@ function triggerDownload(blobData, filename) {
   a.click()
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
+}
+
+// ── 生成报告 ─────────────────────────────────────────────────────────
+const generateDialogVisible = ref(false)
+const generating = ref(false)
+const generateForm = reactive({
+  orgId: null,
+  reportMonth: (() => {
+    const d = new Date()
+    d.setMonth(d.getMonth() - 1)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+  })(),
+})
+
+function disabledFutureMonth(date) {
+  const now = new Date()
+  return date > new Date(now.getFullYear(), now.getMonth(), 1)
+}
+
+async function handleGenerateReport() {
+  if (!generateForm.orgId || !generateForm.reportMonth) {
+    ElMessage.warning('请选择机构和报告月份')
+    return
+  }
+  generating.value = true
+  try {
+    const result = await generateMonthlyReport({
+      orgId: generateForm.orgId,
+      reportMonth: generateForm.reportMonth,
+    })
+    ElMessage.success(result?.message || '报告生成成功')
+    generateDialogVisible.value = false
+
+    // 如果当前选中的机构就是生成报告的机构，刷新报告列表
+    if (!selectedOrgId.value || selectedOrgId.value === generateForm.orgId) {
+      selectedOrgId.value = generateForm.orgId
+      await loadReportList()
+    }
+  } catch (e) {
+    // 409 表示报告已存在
+    const msg = e?.response?.data?.message || e?.message || '生成失败，请重试'
+    ElMessage.warning(msg)
+  } finally {
+    generating.value = false
+  }
 }
 
 // ── 生命周期 ──────────────────────────────────────────────────────────

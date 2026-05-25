@@ -32,44 +32,54 @@ function buildIssueRatioTrend(orgId, statMonth) {
   return { months, data }
 }
 
-function buildCategoryPie() {
-  // Group existing mock result details by category
-  const map = {}
-  for (const d of mockResultDetails) {
-    map[d.ruleCategoryName] = (map[d.ruleCategoryName] || 0) + 1
-  }
-  // Inflate to look realistic
-  return Object.entries(map).map(([name, v]) => ({
+// Org-specific category distribution weights (deterministic by orgId)
+const ORG_CATEGORY_WEIGHTS = {
+  0: [38, 24, 16, 10, 6, 4, 1, 1],   // global
+  1: [42, 20, 18, 8,  6, 3, 2, 1],   // 达州市中医医院 - 空值问题多
+  2: [28, 35, 12, 12, 7, 4, 1, 1],   // 达州市中心医院 - 值域问题多
+  3: [30, 22, 26, 10, 6, 4, 1, 1],   // 通川区人民医院 - 规范问题多
+  4: [35, 18, 15, 14, 8, 6, 3, 1],   // 通川区社区卫生服务中心
+  5: [32, 25, 14, 14, 8, 4, 2, 1],   // 达县人民医院
+  6: [40, 20, 16, 10, 7, 4, 2, 1],   // 宣汉县人民医院
+  7: [36, 22, 18, 12, 6, 3, 2, 1],   // 开江县中医院
+}
+
+const CATEGORY_NAMES = ['空值检查','值域检查','规范检查','逻辑检查','关联性检查','完整性检查','一致性检查','及时性检查']
+
+function buildCategoryPie(orgId) {
+  const numOrgId = orgId ? Number(orgId) : 0
+  const weights = ORG_CATEGORY_WEIGHTS[numOrgId] || ORG_CATEGORY_WEIGHTS[0]
+  const baseCounts = { 0: 89430, 1: 76500, 2: 62800, 3: 45200, 4: 38900, 5: 52100, 6: 41300, 7: 33600 }
+  const base = baseCounts[numOrgId] || 89430
+  const totalWeight = weights.reduce((a, b) => a + b, 0)
+  return CATEGORY_NAMES.map((name, i) => ({
     name,
-    value: v * 287 + Math.floor(Math.random() * 50),
+    value: Math.round(base * weights[i] / totalWeight),
   }))
 }
 
-function buildDatasetRanking() {
-  const map = {}
-  for (const d of mockResultDetails) {
-    map[d.datasetName] = (map[d.datasetName] || 0) + 1
-  }
-  // Top 10 datasets, ensure 10 entries
-  const arr = Object.entries(map).map(([name, v]) => ({
-    datasetName: name,
-    issueCount: v * 415 + Math.floor(Math.random() * 200),
-  }))
-  // Pad if fewer than 10 from existing datasets
-  if (arr.length < 10) {
-    const extras = mockDatasets
-      .filter(ds => !arr.some(a => a.datasetName === ds.datasetName))
-      .slice(0, 10 - arr.length)
-    extras.forEach(ds => {
-      arr.push({
-        datasetName: ds.datasetName,
-        issueCount: 50 + Math.floor(Math.random() * 800),
-      })
-    })
-  }
-  return arr
-    .sort((a, b) => b.issueCount - a.issueCount)
-    .slice(0, 10)
+// Deterministic dataset ranking per org
+const DATASET_BASE_ISSUES = {
+  '患者基本信息': 89430,
+  '门诊就诊记录': 56780,
+  '住院入院信息': 34210,
+  '住院出院信息': 28900,
+  '门诊处方主表': 21560,
+  '住院医嘱信息': 18340,
+  '检查检验结果': 15670,
+  '住院病案首页': 12890,
+  '手术操作信息': 9570,
+  '住院诊断信息': 7230,
+}
+
+function buildDatasetRanking(orgId) {
+  const numOrgId = orgId ? Number(orgId) : 0
+  const rng2 = rng((numOrgId + 1) * 7919)
+  return Object.entries(DATASET_BASE_ISSUES).map(([datasetName, baseCount]) => ({
+    datasetName,
+    // Each org has a slightly different distribution (±40%)
+    issueCount: Math.round(baseCount * (0.6 + rng2() * 0.8)),
+  })).sort((a, b) => b.issueCount - a.issueCount).slice(0, 10)
 }
 
 function buildByRuleStats({ datasetId, categoryId, ruleId, ruleLevels }) {
@@ -125,39 +135,38 @@ export const resultHandlers = [
     await mockDelay()
     const url = new URL(request.url)
     const type = url.searchParams.get('type')
+    const orgId = url.searchParams.get('orgId')
+
+    // Org-specific summary data
+    const ORG_SUMMARY = {
+      0:  { totalCheckCount: 18750000, totalCheckCountChange: 8.4,  totalProblemCount: 234560, totalProblemCountChange: -3.1,  problemRatio: 1.25, problemRatioChange: -0.23, fixedRate: 67.3, fixedRateChange: 5.2,  monthNewProblem: 12300, monthNewProblemChange: -8.6 },
+      1:  { totalCheckCount: 2340000,  totalCheckCountChange: 5.2,  totalProblemCount: 29250,  totalProblemCountChange: -4.2,  problemRatio: 1.25, problemRatioChange: -0.23, fixedRate: 72.1, fixedRateChange: 3.8,  monthNewProblem: 1820,  monthNewProblemChange: -6.3 },
+      2:  { totalCheckCount: 2100000,  totalCheckCountChange: 3.1,  totalProblemCount: 41800,  totalProblemCountChange: 12.1, problemRatio: 1.99, problemRatioChange: 0.25,  fixedRate: 51.3, fixedRateChange: -2.1, monthNewProblem: 3450,  monthNewProblemChange: 18.2 },
+      3:  { totalCheckCount: 1850000,  totalCheckCountChange: 7.8,  totalProblemCount: 15360,  totalProblemCountChange: -15.3, problemRatio: 0.83, problemRatioChange: -0.20, fixedRate: 88.5, fixedRateChange: 8.4,  monthNewProblem: 920,   monthNewProblemChange: -15.1 },
+      4:  { totalCheckCount: 980000,   totalCheckCountChange: 2.3,  totalProblemCount: 23800,  totalProblemCountChange: 5.6,  problemRatio: 2.43, problemRatioChange: 0.18,  fixedRate: 44.2, fixedRateChange: 1.2,  monthNewProblem: 2100,  monthNewProblemChange: 7.4 },
+      5:  { totalCheckCount: 1560000,  totalCheckCountChange: 4.5,  totalProblemCount: 35200,  totalProblemCountChange: 8.3,  problemRatio: 2.26, problemRatioChange: 0.33,  fixedRate: 48.7, fixedRateChange: -1.5, monthNewProblem: 2890,  monthNewProblemChange: 11.2 },
+      6:  { totalCheckCount: 1200000,  totalCheckCountChange: 1.8,  totalProblemCount: 52800,  totalProblemCountChange: 22.5, problemRatio: 4.40, problemRatioChange: 1.12,  fixedRate: 28.3, fixedRateChange: -8.9, monthNewProblem: 6120,  monthNewProblemChange: 34.5 },
+      7:  { totalCheckCount: 890000,   totalCheckCountChange: -2.1, totalProblemCount: 18900,  totalProblemCountChange: -5.8, problemRatio: 2.12, problemRatioChange: -0.15, fixedRate: 61.5, fixedRateChange: 4.2,  monthNewProblem: 1560,  monthNewProblemChange: -3.8 },
+    }
+    const numOrgId = orgId ? Number(orgId) : 0
+    const summaryData = ORG_SUMMARY[numOrgId] || ORG_SUMMARY[0]
 
     if (type === 'overview') {
-      return HttpResponse.json({
-        code: 200,
-        message: '成功',
-        data: {
-          totalCheckCount: 18750000,
-          totalCheckCountChange: 8.4,
-          totalProblemCount: 234560,
-          totalProblemCountChange: -3.1,
-          problemRatio: 1.25,
-          problemRatioChange: -0.23,
-          fixedRate: 67.3,
-          fixedRateChange: 5.2,
-          monthNewProblem: 12300,
-          monthNewProblemChange: -8.6,
-        },
-      })
+      return HttpResponse.json({ code: 200, message: '成功', data: summaryData })
     }
 
     // Fallback: Dashboard summary
     return HttpResponse.json({
-      code: 200,
-      message: '成功',
+      code: 200, message: '成功',
       data: {
-        totalChecks: 18750000,
-        totalChecksMoM: 8.4,
-        totalIssues: 234560,
-        totalIssuesMoM: -3.1,
-        issueRatio: 1.25,
-        issueRatioMoM: -0.23,
-        rectificationRate: 67.3,
-        rectificationRateMoM: 5.2,
+        totalChecks: summaryData.totalCheckCount,
+        totalChecksMoM: summaryData.totalCheckCountChange,
+        totalIssues: summaryData.totalProblemCount,
+        totalIssuesMoM: summaryData.totalProblemCountChange,
+        issueRatio: summaryData.problemRatio,
+        issueRatioMoM: summaryData.problemRatioChange,
+        rectificationRate: summaryData.fixedRate,
+        rectificationRateMoM: summaryData.fixedRateChange,
       },
     })
   }),
@@ -213,21 +222,25 @@ export const resultHandlers = [
     })
   }),
 
-  http.get('/api/result/chart/category-pie', async () => {
+  http.get('/api/result/chart/category-pie', async ({ request }) => {
     await mockDelay()
+    const url = new URL(request.url)
+    const orgId = url.searchParams.get('orgId')
     return HttpResponse.json({
       code: 200,
       message: '成功',
-      data: buildCategoryPie(),
+      data: buildCategoryPie(orgId),
     })
   }),
 
-  http.get('/api/result/chart/dataset-ranking', async () => {
+  http.get('/api/result/chart/dataset-ranking', async ({ request }) => {
     await mockDelay()
+    const url = new URL(request.url)
+    const orgId = url.searchParams.get('orgId')
     return HttpResponse.json({
       code: 200,
       message: '成功',
-      data: buildDatasetRanking(),
+      data: buildDatasetRanking(orgId),
     })
   }),
 
@@ -236,12 +249,15 @@ export const resultHandlers = [
     return HttpResponse.json({
       code: 200,
       message: '成功',
+      // Scores strictly decrease with rank (no inversions)
       data: [
-        { rank: 1, orgName: '达州市中医医院',           score: 95.2, issueRatio: 0.8,  rectificationRate: 92 },
-        { rank: 2, orgName: '达州市中心医院',           score: 91.4, issueRatio: 1.1,  rectificationRate: 88 },
-        { rank: 3, orgName: '通川区人民医院',           score: 87.6, issueRatio: 1.6,  rectificationRate: 81 },
-        { rank: 4, orgName: '达川区人民医院',           score: 82.3, issueRatio: 2.0,  rectificationRate: 74 },
-        { rank: 5, orgName: '通川区社区卫生服务中心', score: 76.8, issueRatio: 2.8,  rectificationRate: 65 },
+        { rank: 1, orgId: 3, orgName: '通川区人民医院',             score: 94.8, issueRatio: 0.80, rectificationRate: 93 },
+        { rank: 2, orgId: 1, orgName: '达州市中医医院',             score: 89.8, issueRatio: 1.14, rectificationRate: 77 },
+        { rank: 3, orgId: 7, orgName: '开江县中医院',               score: 88.3, issueRatio: 1.10, rectificationRate: 79 },
+        { rank: 4, orgId: 2, orgName: '达州市中心医院',             score: 78.6, issueRatio: 1.90, rectificationRate: 51 },
+        { rank: 5, orgId: 5, orgName: '达县人民医院',               score: 74.5, issueRatio: 3.00, rectificationRate: 44 },
+        { rank: 6, orgId: 6, orgName: '宣汉县人民医院',             score: 62.1, issueRatio: 6.00, rectificationRate: 28 },
+        { rank: 7, orgId: 4, orgName: '通川区社区卫生服务中心',     score: 55.8, issueRatio: 8.00, rectificationRate: 29 },
       ],
     })
   }),
@@ -314,6 +330,10 @@ export const resultHandlers = [
 
     const datasetId = url.searchParams.get('datasetId')
     if (datasetId) details = details.filter(d => d.datasetId === Number(datasetId))
+
+    // orgId filter (for non-global users, or when explicitly filtering)
+    const orgId = url.searchParams.get('orgId')
+    if (orgId) details = details.filter(d => d.orgId === Number(orgId))
 
     const startDate = url.searchParams.get('startDate')
     const endDate = url.searchParams.get('endDate')

@@ -1,30 +1,27 @@
 import { http, HttpResponse } from 'msw'
 import { mockDelay, mockPaginate, createMockBlob } from '../utils.js'
-import { mockMonthlyReports, getMockReportDetail } from '../data/report.js'
+import { getAllReports, getMockReportDetail, generateMockReport } from '../data/report.js'
 
 export const reportHandlers = [
   /**
-   * 报告列表（支持按 orgId 过滤，最多返回12条）
+   * 报告列表（按 orgId 过滤，最多返回12条，按月份降序）
    */
   http.get('/api/report/monthly', async ({ request }) => {
     await mockDelay()
     const url = new URL(request.url)
     const page = Number(url.searchParams.get('page')) || 1
     const size = Math.min(Number(url.searchParams.get('size')) || 20, 12)
-    let reports = mockMonthlyReports
+    let reports = getAllReports()
 
     const orgId = url.searchParams.get('orgId')
     if (orgId) reports = reports.filter(r => r.orgId === Number(orgId))
 
-    // 按月份降序排列，取最近12个
-    reports = [...reports].sort((a, b) => b.reportMonth.localeCompare(a.reportMonth)).slice(0, 12)
+    reports = [...reports]
+      .sort((a, b) => b.reportMonth.localeCompare(a.reportMonth))
+      .slice(0, 12)
 
     const result = mockPaginate(reports, page, size)
-    return HttpResponse.json({
-      code: 200,
-      message: '成功',
-      data: result,
-    })
+    return HttpResponse.json({ code: 200, message: '成功', data: result })
   }),
 
   /**
@@ -37,6 +34,30 @@ export const reportHandlers = [
       return HttpResponse.json({ code: 404, message: '报告不存在', data: null }, { status: 404 })
     }
     return HttpResponse.json({ code: 200, message: '成功', data: detail })
+  }),
+
+  /**
+   * 生成月度报告（POST）
+   * body: { orgId, reportMonth }
+   */
+  http.post('/api/report/generate', async ({ request }) => {
+    await mockDelay(1500, 2500) // simulate AI analysis time
+    const { orgId, reportMonth } = await request.json()
+
+    if (!orgId || !reportMonth) {
+      return HttpResponse.json({ code: 400, message: '机构和报告月份不能为空', data: null })
+    }
+
+    const result = generateMockReport(orgId, reportMonth)
+    if (result.error) {
+      return HttpResponse.json({ code: 409, message: result.error, data: result.report })
+    }
+
+    return HttpResponse.json({
+      code: 200,
+      message: `${reportMonth}月度质量报告已成功生成`,
+      data: result.report,
+    })
   }),
 
   /**

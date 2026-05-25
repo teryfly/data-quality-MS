@@ -17,7 +17,7 @@ export function useDatasetElements() {
     }
   }
 
-  const elementLabel = (el) => `${el.element_name}（${el.element_code}）`
+  const elementLabel = (el) => `${el.elementName || el.element_name}（${el.elementCode || el.element_code}）`
 
   return { elements, loadingElements, fetchElements, elementLabel }
 }

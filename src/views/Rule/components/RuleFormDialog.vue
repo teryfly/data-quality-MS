@@ -3,9 +3,9 @@
     v-model="visible"
     :title="isEdit ? '编辑规则' : '新增规则'"
     width="860px"
-    :style="{ maxHeight: '85vh' }"
     destroy-on-close
     :before-close="handleBeforeClose"
+    class="rule-form-dialog"
   >
     <el-steps :active="step" align-center style="margin-bottom:28px">
       <el-step title="基本信息" />
@@ -354,3 +354,25 @@ const handleCancel = async () => {
   } catch { /* cancelled */ }
 }
 </script>
+
+<style>
+/* 规则表单弹窗：限高 + 内容区可滚动，使确认框能正常显示在弹窗上方 */
+.rule-form-dialog .el-dialog__body {
+  max-height: calc(85vh - 140px);
+  overflow-y: auto;
+  padding: 16px 24px;
+}
+.rule-form-dialog .el-dialog {
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+.rule-form-dialog .el-dialog__header {
+  flex-shrink: 0;
+}
+.rule-form-dialog .el-dialog__footer {
+  flex-shrink: 0;
+  border-top: 1px solid #f0f0f0;
+  padding: 12px 24px;
+}
+</style>
